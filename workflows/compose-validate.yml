@@ -1,0 +1,25 @@
+# Docker Compose validation: every compose.yaml must resolve. Builds and starts nothing.
+# Needs a .env-free check: variables used with :? must be supplied, so pass placeholders here
+# or adapt the env block to your repo.
+name: Compose validate
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: compose-validate-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  compose:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate each compose file
+        run: |
+          set -euo pipefail
+          for f in $(git ls-files '*compose.yaml' '*compose.yml' '*docker-compose.yml'); do
+            echo "== $f"
+            docker compose -f "$f" config --quiet
+          done

@@ -1,0 +1,18 @@
+# YAML syntax and style check (yamllint). Reports only.
+name: YAML lint
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: yaml-lint-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  yamllint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install yamllint
+      - run: yamllint .
