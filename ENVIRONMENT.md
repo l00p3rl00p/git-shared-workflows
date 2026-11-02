@@ -32,12 +32,23 @@ These are separate from the reusable GitHub Actions checks above. `scripts/sessi
 | --- | --- | --- |
 | Python `ast` | Inspect Python syntax structurally | Python standard library |
 | ast-grep | Search code by syntax structure | Global npm install |
-| Tree-sitter and Python, Rust, TypeScript, Bash grammars | Parse source into syntax trees for structural analysis | Python pip packages |
-| NetworkX | Model and inspect dependency or relationship graphs | Python pip package |
+| [Tree-sitter](https://tree-sitter.github.io/tree-sitter/) and [Python, Rust, TypeScript, Bash grammars](https://github.com/tree-sitter) | Parse source into syntax trees for structural analysis | Python pip packages |
+| [NetworkX](https://networkx.org/documentation/stable/) | Model and inspect dependency or relationship graphs | Python pip package |
 | Pyright, vtsls, rust-analyzer | Navigate definitions, references, and types | pip, npm, and rustup respectively |
 | Ruff, ty | Python lint, format, and type checks | Python pip packages |
 | TypeScript compiler (`tsc`) | TypeScript type checking | Global npm install |
 | Clippy, rustfmt | Rust lint and formatting checks | rustup components |
 | ShellCheck, yamllint | Shell and YAML checks | apt and pip respectively |
 
-Tree-sitter and NetworkX are **available capabilities, not steps required for every edit**: use syntax trees for structural code questions and graphs for dependency or relationship questions. The agent guidance is instructional; it does not prove the tools were installed successfully. The setup script uses unpinned package versions and depends on working Python/pip, npm, rustup, and apt environments with suitable permissions.
+Tree-sitter and NetworkX are **provisioned for agent use, not steps required for every edit**: use syntax trees for structural code questions and graphs for dependency or relationship questions. The agent guidance is instructional; it does not prove the tools were installed successfully. The setup script uses unpinned package versions and depends on working Python/pip, npm, rustup, and apt environments with suitable permissions.
+
+### Install and verify structural tools
+
+The existing [session setup script](scripts/session-setup.sh) installs `networkx`, `tree-sitter`, and the listed grammars using pip. For a manual installation or verification:
+
+```sh
+python3 -m pip install networkx tree-sitter tree-sitter-python tree-sitter-rust tree-sitter-typescript tree-sitter-bash
+python3 -c 'import ast, networkx, tree_sitter, tree_sitter_python, tree_sitter_rust, tree_sitter_typescript, tree_sitter_bash; print("AST, NetworkX, Tree-sitter and grammars available")'
+```
+
+Use the environment's appropriate Python package installation mechanism if pip is managed externally. No MCP server is needed: agents can invoke these Python libraries directly. Session-start provisioning is configured for Claude; other agents must run the setup script or use an environment with these dependencies installed.
