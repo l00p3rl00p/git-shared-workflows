@@ -40,6 +40,7 @@ No action runs automatically just by browsing this repository. These are self-co
 | [`lint-shell-yaml.yml`](workflows/lint-shell-yaml.yml) | ShellCheck and yamllint | Shell or YAML files |
 | [`compose-validate.yml`](workflows/compose-validate.yml) | `docker compose config` | Compose files and required variables |
 | [`gitleaks.yml`](workflows/gitleaks.yml) | Secret scanning in Git history | Nothing additional |
+| [`verify-structural-tools.yml`](workflows/verify-structural-tools.yml) | Installs and exercises Python AST, Tree-sitter grammars, and NetworkX | Python (provisioned by the workflow) |
 
 ## Use it
 
