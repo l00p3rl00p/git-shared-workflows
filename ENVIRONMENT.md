@@ -16,6 +16,7 @@ Each file in `workflows/` is one check, copied into a repo's `.github/workflows/
 | `lint-shell-yaml.yml` | ShellCheck on every `*.sh` and on any file with a bash or sh shebang (such as `scripts/qdev`); yamllint on all YAML | Bash problem or YAML syntax or style problem | Shell scripts or YAML |
 | `compose-validate.yml` | Every Compose file resolves (`docker compose config`) | A required variable is missing or a file is invalid | Compose files, plus any variables they require (set them in the env block first) |
 | `gitleaks.yml` | Secrets in git history | A credential is found in any commit | Nothing; uses the built-in `GITHUB_TOKEN` |
+| `verify-structural-tools.yml` | Installs and exercises Python AST, Tree-sitter (Python/Rust/TypeScript/Bash), and NetworkX | Import, parsing, or graph checks fail | Python provisioned by the workflow |
 
 ## Rules
 
