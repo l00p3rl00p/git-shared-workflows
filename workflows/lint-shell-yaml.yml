@@ -16,6 +16,8 @@ jobs:
       - name: ShellCheck every shell script (by extension or bash/sh shebang)
         run: |
           set -euo pipefail
-          { git ls-files '*.sh'; git ls-files -z | xargs -0 grep -l -I -E '^#!.*/(env )?(ba|z)?sh' 2>/dev/null || true; } | sort -u | xargs -r shellcheck
+          for f in $(git ls-files); do
+            case "$f" in *.sh) echo "$f" ;; *) head -n1 "$f" 2>/dev/null | grep -q -E '^#!.*/(env )?(ba|z)?sh' && echo "$f" ;; esac
+          done | sort -u | xargs -r shellcheck
       - run: pip install yamllint
       - run: yamllint .
