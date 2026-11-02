@@ -1,7 +1,7 @@
 name: Verify structural analysis tools
 on:
   push:
-    branches: [main]
+    branches: [main, 'test/structural-tools-negative']
   workflow_dispatch:
 permissions:
   contents: read
@@ -29,7 +29,7 @@ jobs:
           import tree_sitter_typescript
           import tree_sitter_bash
 
-          source = b"def answer():\n    return 42\n"
+          source = b"def answer(:\n    return 42\n"
           parsed = ast.parse(source.decode())
           assert isinstance(parsed.body[0], ast.FunctionDef)
           grammars = [
