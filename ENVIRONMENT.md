@@ -1,5 +1,7 @@
 # Environment: what each shared check does
 
+These checks are boring on purpose. They are a safety net for people and coding agents, and they only report.
+
 Each file in `workflows/` is one check, copied into a repo's `.github/workflows/`. Every check:
 
 - runs on push to `main` and on manual start;

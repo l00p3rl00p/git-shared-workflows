@@ -2,6 +2,8 @@
 
 Boring engineering checks as GitHub Actions workflows. Copy the files you want into a repo's `.github/workflows/` folder. Nothing here runs by itself, and nothing here changes code.
 
+It is also a small help for coding agents: the checks give them a clear, boring bar to meet before a push.
+
 | File | Checks | Needs in the repo |
 | --- | --- | --- |
 | `workflows/lint-python.yml` | ruff lint and format, ty type check | Python files |
