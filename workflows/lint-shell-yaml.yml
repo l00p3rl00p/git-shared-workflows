@@ -1,5 +1,4 @@
-# Shell script lint (ShellCheck, preinstalled on GitHub's Ubuntu runners). Reports only.
-name: ShellCheck
+name: Lint: Shell and YAML
 on:
   push:
     branches: [main]
@@ -7,11 +6,13 @@ on:
 permissions:
   contents: read
 concurrency:
-  group: shellcheck-${{ github.ref }}
+  group: lint-shell-yaml-${{ github.ref }}
   cancel-in-progress: true
 jobs:
-  shellcheck:
+  lint-shell-yaml:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - run: git ls-files '*.sh' | xargs -r shellcheck
+      - run: pip install yamllint
+      - run: yamllint .

@@ -1,5 +1,4 @@
-# Python lint and format check (ruff). Reports only; changes nothing.
-name: Ruff
+name: Lint: Python
 on:
   push:
     branches: [main]
@@ -7,13 +6,14 @@ on:
 permissions:
   contents: read
 concurrency:
-  group: ruff-${{ github.ref }}
+  group: lint-python-${{ github.ref }}
   cancel-in-progress: true
 jobs:
-  ruff:
+  lint-python:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: pip install ruff
+      - run: pip install ruff ty
       - run: ruff check .
       - run: ruff format --check .
+      - run: ty check

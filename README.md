@@ -1,27 +1,23 @@
 # git-shared-workflows
 
-Boring engineering checks as GitHub Actions workflows. Copy the files you want into a repo's `.github/workflows/` folder. Nothing here runs by itself.
+Boring engineering checks as GitHub Actions workflows. Copy the files you want into a repo's `.github/workflows/` folder. Nothing here runs by itself, and nothing here changes code.
 
-| File | Checks | Triggers |
+| File | Checks | Needs in the repo |
 | --- | --- | --- |
-| `workflows/ruff.yml` | Python lint and format (`ruff check`, `ruff format --check`) | push to main, manual |
-| `workflows/shellcheck.yml` | Shell scripts (`shellcheck`) | push to main, manual |
-| `workflows/yaml-lint.yml` | YAML syntax and style (`yamllint`) | push to main, manual |
-| `workflows/compose-validate.yml` | Every Compose file resolves (`docker compose config`) | push to main, manual |
-| `workflows/gitleaks.yml` | Secrets in git history (gitleaks) | push to main, manual |
+| `workflows/lint-python.yml` | ruff lint and format, ty type check | Python files |
+| `workflows/lint-rust.yml` | `cargo fmt --check`, `cargo clippy` (warnings are errors) | `Cargo.toml` |
+| `workflows/lint-typescript.yml` | `tsc --noEmit` after `npm ci` | `package.json` and `package-lock.json` |
+| `workflows/lint-shell-yaml.yml` | ShellCheck on `*.sh`, yamllint on all YAML | Shell scripts or YAML |
+| `workflows/compose-validate.yml` | Every Compose file resolves (`docker compose config`) | Compose files and their required variables |
+| `workflows/gitleaks.yml` | Secrets in git history | Nothing extra |
 
 ## Use
 
 ```sh
-cp path/to/git-shared-workflows/workflows/ruff.yml .github/workflows/
-git add .github/workflows/ruff.yml && git commit -m "Add ruff check" && git push
+cp path/to/git-shared-workflows/workflows/lint-python.yml .github/workflows/
+git add .github/workflows/lint-python.yml && git commit -m "Add Python lint" && git push
 ```
 
-Each file is self-contained. Copies do not update when this repo changes.
+Copy only the languages the repo uses. Each file is self-contained, and copies do not update when this repo changes.
 
-## Rules
-
-- Checks report; they never change code.
-- Each run is cancelled by a newer run on the same branch.
-- Nothing here needs a secret except the built-in `GITHUB_TOKEN`.
-- Pins only when something forces one. Otherwise the latest tool is used.
+Details for every file are in [ENVIRONMENT.md](ENVIRONMENT.md).
