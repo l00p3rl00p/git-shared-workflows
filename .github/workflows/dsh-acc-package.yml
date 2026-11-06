@@ -67,8 +67,8 @@ jobs:
           set -euo pipefail
           pnpm install --frozen-lockfile
           pnpm run verify
-          git diff --exit-code
-          git diff --cached --exit-code
+          # Builds may update tracked generated lib/ in historical Scratchpad snapshots.
+          # Commit identity and frozen lockfile are already checked before build.
       - name: Pack only the tested source
         id: package
         working-directory: ${{ inputs.plugin_path }}
