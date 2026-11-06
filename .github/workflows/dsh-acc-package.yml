@@ -1,0 +1,118 @@
+name: Strict DSH ACC package verification
+
+on:
+  workflow_call:
+    inputs:
+      source_repository:
+        description: "Authoritative source repository (defaults to caller checkout when empty)"
+        type: string
+        required: false
+        default: ""
+      source_ref:
+        description: "Source ref for an external repository"
+        type: string
+        required: false
+        default: main
+      plugin_path:
+        description: "Package root relative to checkout"
+        type: string
+        required: false
+        default: "."
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/dsh-acc-package.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  verify-package:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout exact caller commit
+        if: inputs.source_repository == ''
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Checkout authoritative external source
+        if: inputs.source_repository != ''
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ inputs.source_repository }}
+          ref: ${{ inputs.source_ref }}
+          persist-credentials: false
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: pnpm
+          cache-dependency-path: ${{ inputs.plugin_path == '' && 'pnpm-lock.yaml' || format('{0}/pnpm-lock.yaml', inputs.plugin_path) }}
+      - name: Record exact committed source and validate path
+        id: source
+        env:
+          PLUGIN_PATH: ${{ inputs.plugin_path }}
+        run: |
+          set -euo pipefail
+          test -f "$PLUGIN_PATH/package.json"
+          test -f "$PLUGIN_PATH/pnpm-lock.yaml"
+          git diff --exit-code
+          git diff --cached --exit-code
+          revision="$(git rev-parse HEAD)"
+          echo "revision=$revision" >> "$GITHUB_OUTPUT"
+          echo "Source commit: $revision"
+          echo "Package: $PLUGIN_PATH"
+      - name: Install dependencies, test, lint, typecheck and validate browser bundle
+        working-directory: ${{ inputs.plugin_path }}
+        run: |
+          set -euo pipefail
+          pnpm install --frozen-lockfile
+          pnpm run verify
+          git diff --exit-code
+          git diff --cached --exit-code
+      - name: Pack only the tested source
+        id: package
+        working-directory: ${{ inputs.plugin_path }}
+        run: |
+          set -euo pipefail
+          mkdir -p dist
+          pnpm pack --pack-destination dist
+          version="$(node -p "require('./package.json').version")"
+          artifact="dist/dsh-auto-code-correct-${version}.tgz"
+          test -s "$artifact"
+          for entry in package/lib/index.js package/lib/client.js package/lib/cli.js package/cordis.patch.yml; do
+            tar -tzf "$artifact" | grep -Fxq "$entry"
+          done
+          sha256sum "$artifact" > "$artifact.sha256"
+          sha256sum --check "$artifact.sha256"
+          printf '%s\n' "${{ steps.source.outputs.revision }}" > "$artifact.source-commit"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "artifact=$artifact" >> "$GITHUB_OUTPUT"
+      - name: Verify SHA before installing into clean official DSH profile
+        working-directory: ${{ inputs.plugin_path }}
+        env:
+          DSH_HOME: ${{ runner.temp }}/acc-dsh-home
+        run: |
+          set -euo pipefail
+          artifact="${{ steps.package.outputs.artifact }}"
+          sha256sum --check "$artifact.sha256"
+          pnpm dlx --package=@deepseek-ai/dsh@0.2.1-rc.5 dsh plugin --profile acc-ci add \
+            @deepseek-ai/dsh-lsp@0.2.1-rc.5 \
+            @deepseek-ai/dsh-lsp-stdio@0.2.1-rc.5 \
+            "./$artifact"
+          pnpm dlx --package=@deepseek-ai/dsh@0.2.1-rc.5 dsh --profile acc-ci --dump-config | grep -q auto-code-correct
+          sha256sum --check "$artifact.sha256"
+      - name: Publish verified package, checksum and provenance
+        uses: actions/upload-artifact@v4
+        with:
+          name: dsh-auto-code-correct-plugin-${{ steps.package.outputs.version }}
+          path: |
+            ${{ inputs.plugin_path }}/dist/dsh-auto-code-correct-${{ steps.package.outputs.version }}.tgz
+            ${{ inputs.plugin_path }}/dist/dsh-auto-code-correct-${{ steps.package.outputs.version }}.tgz.sha256
+            ${{ inputs.plugin_path }}/dist/dsh-auto-code-correct-${{ steps.package.outputs.version }}.tgz.source-commit
+          if-no-files-found: error
+          retention-days: 90
