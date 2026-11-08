@@ -2,8 +2,8 @@
 
 **Reusable GitHub Actions for consistent, verifiable builds and code checks.**
 
-[![GitHub Actions](https://img.shields.io/badge/Automation-GitHub_Actions-2088FF?style=flat-square&logo=githubactions&logoColor=white)](.github/workflows/)
-[![DSH](https://img.shields.io/badge/DSH-Plugin_Packaging-178A94?style=flat-square)](.github/workflows/dsh-acc-package.yml)
+[![GitHub Actions](https://img.shields.io/badge/Automation-GitHub_Actions-FF1744?style=flat-square&logo=githubactions&logoColor=white)](.github/workflows/)
+[![DSH](https://img.shields.io/badge/DSH-Plugin_Packaging-00D6C2?style=flat-square)](.github/workflows/dsh-acc-package.yml)
 [![YAML](https://img.shields.io/badge/Configuration-YAML-6853B7?style=flat-square&logo=yaml&logoColor=white)](workflows/)
 
 [Getting started](#getting-started) · [Workflow catalog](#workflow-catalog) · [README template](README.template.md) · [Contributing](CONTRIBUTING.md)
