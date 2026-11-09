@@ -1,15 +1,6 @@
 name: Verify reusable ACC packaging
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - ".github/workflows/dsh-acc-package.yml"
-      - ".github/workflows/verify-acc-package.yml"
-  pull_request:
-    paths:
-      - ".github/workflows/dsh-acc-package.yml"
-      - ".github/workflows/verify-acc-package.yml"
   workflow_dispatch:
 
 permissions:
