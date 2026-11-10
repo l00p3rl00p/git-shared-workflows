@@ -41,7 +41,7 @@ jobs:
           persist-credentials: false
       - uses: pnpm/action-setup@v4
         with:
-          version: 10
+          version: 12
       - uses: actions/setup-node@v4
         with:
           node-version: "24"
@@ -65,10 +65,21 @@ jobs:
         working-directory: ${{ inputs.plugin_path }}
         run: |
           set -euo pipefail
+          # pnpm 12 uses explicit build-script approvals; authorize only the four
+          # audited ACC dependencies in this disposable Actions checkout.
+          # Do not call approve-builds after setting allowBuilds: it warns when
+          # no packages await approval. Do not suppress any other warnings.
+          cat > pnpm-workspace.yaml <<'YAML'
+          allowBuilds:
+            '@deepseek-ai/dsh-subprocess-local': true
+            esbuild: true
+            koffi: true
+            node-pty: true
+          YAML
           pnpm install --frozen-lockfile
           pnpm run verify
-          # Builds may update tracked generated lib/ in historical Scratchpad snapshots.
-          # Commit identity and frozen lockfile are already checked before build.
+          # The package gate is part of verify: it inspects emitted browser
+          # imports, readiness Remote signatures, and native ModuleLoader output.
       - name: Pack only the tested source
         id: package
         working-directory: ${{ inputs.plugin_path }}
